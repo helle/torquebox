@@ -383,10 +383,14 @@ def server_stop
   if @server_pid
     kill_process(@server_pid)
     unless windows?
-      processes = `ps -o pid --ppid #{@server_pid}`.split("\n")
-      processes.each do |pid|
-        pid = pid.to_i
-        kill_process(pid) if pid > 0
+      processes = `ps -o pid,ppid`.split("\n")
+      processes.each do |process|
+        pid = process[0,5].to_i
+        ppid = process[5,6].to_i
+        
+        if ppid == @server_pid
+          kill_process(pid) if pid > 0
+        end
       end
     end
     @server_pid = nil
